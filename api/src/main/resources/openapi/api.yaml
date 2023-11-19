@@ -1,0 +1,115 @@
+---
+openapi: 3.0.2
+info:
+  title: SD Customer Loan
+  description: API for SD Customer Loan
+  contact:
+    name: ianache
+    email: ianache@crossnetcorp.com
+  license:
+    name: crossnetcorp License
+    url: https://www.crossnetcorp.com/license
+  version: 1.0.0-SNAPSHOT
+servers:
+- url: http://0.0.0.0:8082/customerloan/api/v1
+  description: URL del endpoint
+tags:
+- name: SD Customer Loan
+  description: Microservicio customerloan
+paths:
+  /customerloan:
+    get:
+      tags:
+      - SD Customer Loan
+      summary: Listado de CustomerLoan
+      operationId: listarCustomerLoan
+      responses:
+        '200':
+          description: CustomerLoan
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/ListCustomerLoanView"
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - SD Customer Loan
+      summary: Registra nuevo SD Customer Loan
+      operationId: registrarCustomerLoan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NewCustomerLoanRequest"
+        required: true
+      responses:
+        '201':
+          description: CustomerLoan registrado
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NewCustomerLoanView"
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    APIError:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          format: int32
+        mensaje:
+          type: string
+        razon:
+          type: string
+        ubicacion:
+          type: string
+        errores:
+          type: array
+          items:
+            "$ref": "#/components/schemas/APIError"
+    NewCustomerLoanRequest:
+      required:
+      - descripcion
+      type: object
+      properties:
+        descripcion:
+          type: string
+    NewCustomerLoanView:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        descripcion:
+          type: string
+        estado:
+          type: integer
+          format: int32
+        fecha:
+          type: string
+          format: date-time
+    ListCustomerLoanView:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        descripcion:
+          type: string
+        estado:
+          type: integer
+          format: int32
+        fecha:
+          type: string
+          format: date-time
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+

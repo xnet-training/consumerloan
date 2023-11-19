@@ -48,3 +48,16 @@ java -javaagent:../elastic-apm-agent-1.43.0.jar -jar .\api\target\microservicio-
 java -javaagent:../elastic-apm-agent-1.43.0.jar -Delastic.apm.service_name=consumerloan -Delastic.apm.secret_token= -Delastic.apm.server_url=http://172.17.8.220:8200 -Delastic.apm.environment=dev -Delastic.apm.application_packages=com.crossnetcorp.banking -jar .\api\target\microservicio-api.jar --spring.profiles.active=dev
 
 ```
+
+# Enviar Datos a Servidor de OPEN Telemetry
+
+```
+export OTEL_RESOURCE_ATTRIBUTES=service.name=checkoutService,service.version=1.1,deployment.environment=production
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://apm_server_url:8200
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer an_apm_secret_token"
+export OTEL_METRICS_EXPORTER="otlp" \
+export OTEL_LOGS_EXPORTER="otlp" \ 
+java -javaagent:/path/to/opentelemetry-javaagent-all.jar \
+     -classpath lib/*:classes/ \
+     com.mycompany.checkout.CheckoutServiceServer
+```

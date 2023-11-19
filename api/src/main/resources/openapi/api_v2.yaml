@@ -1,0 +1,197 @@
+---
+openapi: 3.0.2
+info:
+  title: SD Consumer Loan
+  description: API for SD Consumer Loan
+  contact:
+    name: ianache
+    email: ianache@crossnetcorp.com
+  license:
+    name: crossnetcorp License
+    url: https://www.crossnetcorp.com/license
+  version: 1.0.0-SNAPSHOT
+
+servers:
+- url: http://0.0.0.0:8082/consumerloan/api/v1
+  description: URL del endpoint
+  
+tags:
+- name: Initiate_Process
+  description: Iniciar proceso
+
+security:
+- bearerAuth: []
+- oauth2:
+  - read
+  - write
+  - admin
+
+paths:
+  /consumerloanfacilitys:
+    post:
+      tags:
+      - Initiate_Process
+      summary: Registrar un nuevo Préstamo de Comsumo Pignoraticio
+      description: |
+        Registrar un nuevo Préstamo de Comsumo Pignoraticio
+      operationId: registrarPrestamoPignoraticio
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PrestamoConsumoPignoraticioRequest"
+      responses:
+        '201':
+          description: Consumer Loan registrado
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResourceId"
+        '500':
+          description: Error de servicio
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/APIError"
+      security:
+        - oauth2:
+          - write
+          - admin
+  /consumerloanfacilitys/solicitudcreditopignoraticio:
+    post:
+      tags:
+      - Initiate_Process
+      summary: Registra la solicitud de préstamo
+      description: |
+        Se realiza el registro de una nueva solicitud de prestamo respaldado en joyas de acuerdo con los requisitos del proceso.
+      operationId: registrarSolicitudPrestamoPignoraticio
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/SolicitudPrestamoPignoraticioRequest"
+        required: true
+      responses:
+        '201':
+          description: Consumer Loan registrado
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResourceId"
+      security:
+        - oauth2:
+          - write
+          - admin
+  /consumerloanfacilitys/{loanId}/solicitudcreditopignoraticio/{id}:
+    get:
+      tags:
+        - Initiate_Process
+      summary: Obtiene una solicitud de préstamo pignoraticio registrada.
+      description: |
+        Permite obtener una solicitud de préstamo pignoraticio registrada de acuerdo con su código único de registro
+      operationId: obtenerSolicitudPrestamoPignoraticio
+      parameters:
+        - name: loanId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Solicitud de Préstamo Pignoraticio
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SolicitudPrestamoPigniraticioResponse"
+      security:
+        - oauth2:
+          - read
+          - admin
+
+components:
+  schemas:
+    APIError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        reason:
+          type: string
+        location:
+          type: string
+        errors:
+          type: array
+          items:
+            "$ref": "#/components/schemas/APIError"
+    SolicitudPrestamoPignoraticioRequest:
+      required:
+      - descripcion
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date-time
+          example: '2023-10-02T00:00:00'
+        monto:
+          type: number
+          example: 1900.00
+    SolicitudPrestamoPigniraticioResponse:
+      type: object
+      properties:
+        id:
+          type: string
+    ResourceId:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador unico del objeto
+    PrestamoConsumoPignoraticioRequest:
+      type: object
+      properties:
+        clienteId:
+          type: string
+          description: Identificador unico de la Party que solicita el prestamo
+          example: aaaa-bbbb-ccccdddd-eeee        
+        monto:
+          type: number
+          description: Monto solicitado
+          example: 1900.00
+        cuotas:
+          type: number
+          description: Cantidad de cuotas
+          example: 24
+        solicitudId:
+          type: string
+          description: Solicitud de préstamo pignoraticio
+          example: aaaa-bbbb-ccccdddd-eeee
+        productoId:
+          type: string
+          description: Referencia al Producto/Servicio de Préstamo Pignoraticio
+          example: aaaa-bbbb-ccccdddd-eeee
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://oauth2-api-qa.comsatelsmart.com/auth/realms/microservicios/protocol/openid-connect/auth
+          tokenUrl: https://oauth2-api-qa.comsatelsmart.com/auth/realms/microservicios/protocol/openid-connect/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations
+

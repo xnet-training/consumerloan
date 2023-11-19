@@ -8,7 +8,8 @@ COPY . /usr/src/app
 RUN mvn --batch-mode -f /usr/src/app/pom.xml -s /usr/src/app/ci_settings.xml clean package && \
     test $(find ./ -type f -name '*-api.jar' | wc -l) -eq 1
 
-FROM openjdk:15-jdk
+FROM amazoncorretto:15-alpine-jdk
+#FROM openjdk:15-jdk
 ENV PORT ${PORT}
 ENV APP_PROFILE=kubernetes
 ENV APP_NAME=customerloan
