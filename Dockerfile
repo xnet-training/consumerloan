@@ -11,13 +11,15 @@ RUN mvn --batch-mode -f /usr/src/app/pom.xml -s /usr/src/app/ci_settings.xml cle
 FROM amazoncorretto:15-alpine-jdk
 #FROM openjdk:15-jdk
 ENV PORT ${PORT}
-ENV APP_PROFILE=kubernetes
-ENV APP_NAME=customerloan
-ENV VAULT_SECRET=changeme
-ENV VAULT_URI=http://vault-service.management.svc.domain.local:8200
+ENV SPRING_PROFILES_ACTIVE=kubernetes
+ENV SPRING_APPLICATION_NAME=customerloan
+ENV SPRING_CLOUD_VAULT_SECRET=changeme
+ENV SPRING_CLOUD_VAULT_URI=http://vault-service.management.svc.domain.local:8200
+ENV SPRING_CONFIG_LOCATION=file:///opt/config/
 
 WORKDIR /usr/app
 COPY --from=BUILD /usr/src/app/api/target/microservicio-api.jar /usr/app/
 
 EXPOSE ${PORT}
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar","/usr/app/microservicio-api.jar", "--spring.profiles.active=${APP_PROFILE}", "--spring.cloud.vault.token=${VAULT_SECRET}", "--spring.application.name=${APP_NAME}", "--spring.cloud.vault.uri=${VAULT_URI}", "--spring.config.location=file:///opt/config/"]
+
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar","/usr/app/microservicio-api.jar"]

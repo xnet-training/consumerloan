@@ -11,6 +11,18 @@ terraform init
 terraform apply --auto-aprove
 ```
 
+## Ejecutar Microservicios
+
+### Ejecucion como Contenedor
+
+```sh
+docker build . -t xnet/consumerloan:0.1.0
+docker push xnet/consumerloan:0.1.0
+```
+
+
+### Ejecucion desde CLI
+
 ```sh
 $ mvn clean install
 $ mvn spring-boot:run -pl customerloan

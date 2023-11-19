@@ -1,0 +1,98 @@
+version: "3.7"
+
+networks:
+  microservices-network:
+    driver: bridge
+
+#- Notas: sebe otorgar permisos para acceso remoto al usuario 'microservicio'
+# grant all privileges on *.* to 'microservicio'@'%' identified by 'secr3t!';
+services:
+  #
+  ## DB Layer
+  #
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'customerloan'
+      # So you don't have to use root, but you can if you like
+      MYSQL_USER: 'microservicio'
+      # You can use whatever password you like
+      MYSQL_PASSWORD: 'secr3t!'
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: secr3t!'
+    ports:
+    # <Port exposed> : <MySQL Port running inside container>
+    - '3306:3306'
+    expose:
+      # Opens port 3306 on the container
+    - '3306'
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 2
+      start_period: 0s
+    # Where our data will be persisted
+    volumes:
+    - my-db:/var/lib/mysql
+    networks:
+    - microservices-network
+  #
+  ## Vault
+  #
+  vault:
+    image: vault:${VAULT_VERSION:-1.13.3}
+    ports:
+    - "8201:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8200/v1/sys/health?standbyok=true"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+    - microservices-network
+  #
+  ## API Layer
+  #
+  api:
+    image: xnet/consumerloan:0.1.0
+    restart: always
+    ports:
+    - "8010:8080"
+    env_file:
+    - .env
+    volumes:
+    - "/opt/config:/opt/config"
+    networks:
+    - microservices-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    depends_on:
+      vault:
+        condition: service_healthy
+
+    #environment:
+    #  #OTEL_RESOURCE_ATTRIBUTES: "service.name=consumerloan,service.version=0.1.0,deployment.environment=dev"
+    #  #OTEL_EXPORTER_OTLP_ENDPOINT: https://apm_server_url:8200
+    #  #OTEL_EXPORTER_OTLP_HEADERS: Authorization=Bearer ${OTLP_TOKEN:-}
+    #  #OTEL_METRICS_EXPORTER: otlp
+    #  #OTEL_LOGS_EXPORTER: otlp
+    #  ELASTIC_APM_SERVICE_NAME: consumerloan
+    #  ELASTIC_APM_SECRET_TOKEN: ""
+    #  ELASTIC_APM_SERVER_URL: "http://172.17.8.220:8200"
+    #  ELASTIC_APM_ENVIRONMENT: "dev" 
+    #  ELASTIC_APM_APPLICATION_PACKAGES: "com.crossnetcorp.banking"
+    #  JAVA_ADDITIONAL_OPTS: "-javaagent:../elastic-apm-agent-1.43.0.jar"
+    #  #  -Delastic.apm.service_name=consumerloan -Delastic.apm.secret_token= -Delastic.apm.server_url=http://172.17.8.220:8200 -Delastic.apm.environment=dev -Delastic.apm.application_packages=com.crossnetcorp.banking" 
+# Names our volume
+volumes:
+  my-db:
