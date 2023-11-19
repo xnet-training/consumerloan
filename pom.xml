@@ -13,7 +13,7 @@
     <artifactId>consumerloan</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Microservice SD cloudonsumer Loan :: Main</name>
+    <name>Microservice SD Consumer Loan :: Main</name>
     <description>Microservice SD Consumer Loan</description>
     <properties>
         <java.version>15</java.version>
